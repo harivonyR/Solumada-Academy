@@ -76,16 +76,62 @@ function htmlRender(username, password) {
 //Page login
 routeExp.route("/").get(async function (req, res) {
     session = req.session;
-    if (session.occupation == "user") {
-        res.redirect("/timedefine");
+    if (session.type_util == "Professeur") {
+        res.redirect("/cours");
     }
-    else if (session.occupation == "admin") {
-        res.redirect('/management');
+    else if (session.type_util == "Admin") {
+        res.redirect('/admin');
+    }
+    else if (session.type_util == "Participant") {
+        res.redirect('/mon_cours');
     }
     else {
         res.render("LoginPage.html", { erreur: "" });
     }
 
+});
+
+//List cours == professeur
+routeExp.route("/cours").get(async function (req, res) {
+    session = req.session;
+    if (session.type_util == "Professseur") {
+        mongoose
+            .connect(
+                "mongodb+srv://solumada-academy:academy123456@cluster0.xep87.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+                {
+                    useUnifiedTopology: true,
+                    UseNewUrlParser: true,
+                }
+            )
+            .then(async () => {
+                var projects = await projectSchema.find({ status: 'In Progress' });
+                res.render("Cours.html", { available_project: projects });
+            });
+    }
+    else {
+        res.redirect("/");
+    }
+});
+//admin
+routeExp.route("/admin").get(async function (req, res) {
+    session = req.session;
+    if (session.type_util == "Admin") {
+        mongoose
+            .connect(
+                "mongodb+srv://solumada-academy:academy123456@cluster0.xep87.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+                {
+                    useUnifiedTopology: true,
+                    UseNewUrlParser: true,
+                }
+            )
+            .then(async () => {
+                var projects = await projectSchema.find({ status: 'In Progress' });
+                res.render("Admin.html", { available_project: projects });
+            });
+    }
+    else {
+        res.redirect("/");
+    }
 });
 //Post login
 routeExp.route("/login").post(async function (req, res) {
@@ -103,13 +149,14 @@ routeExp.route("/login").post(async function (req, res) {
         .then(async () => {
             var logger = await UserSchema.findOne({ username: email, password: password });
             if (logger) {
-                if (logger.occupation == "user") {
-                    session.occupation = logger.occupation;
+                if (logger.type_util == "user") {
+                    session.type_util = logger.type_util;
                     session.m_code = logger.m_code;
                     session.num_agent = logger.num_agent;
+                    session.type_util = logger.type_util;
                     res.redirect("/timedefine");
                 } else {
-                    session.occupation = logger.occupation;
+                    session.type_util = logger.type_util;
                     res.redirect("/management");
                 }
             } else {
@@ -156,13 +203,13 @@ routeExp.route("/addemp").post(async function (req, res) {
 
 //New employee
 routeExp.route("/newemployee").get(async function (req, res) {
-    // session = req.session;
-    res.render("newemployee.html");
-    // if (session.occupation == "admin") {
-    //     res.render("newemployee.html");
-    // }
-    // else {
-    //     res.redirect("/");
-    // }
+    session = req.session;
+    // res.render("newemployee.html");
+    if (session.type_util == "admin") {
+        res.render("newemployee.html");
+    }
+    else {
+        res.redirect("/");
+    }
 });
 module.exports = routeExp;

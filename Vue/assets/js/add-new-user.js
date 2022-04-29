@@ -68,11 +68,12 @@ function verify_all() {
 
 
 function add_new_employee() {
-    console.log('add-new-employe')
     var email = document.getElementById("email").value;
     var m_code = document.getElementById("mcode").value;
     var num_agent = document.getElementById("num_agent").value;
-    sendRequest('/addemp', email, m_code, num_agent);
+    var type_util = document.getElementById("type_util").value;
+    console.log("doc.getElem == " + type_util);
+    sendRequest('/addemp', email, m_code, num_agent, type_util);
 }
 function sendRequest(url, email, m_code, num_agent) {
     console.log('sendRequest')
@@ -93,5 +94,5 @@ function sendRequest(url, email, m_code, num_agent) {
             }
         }
     };
-    http.send("email=" + email + "&mcode=" + m_code + "&num_agent=" + num_agent);
+    http.send("email=" + email + "&mcode=" + m_code + "&num_agent=" + num_agent + "&type_util=" + type_util);
 }
